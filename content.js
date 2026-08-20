@@ -129,7 +129,6 @@
     runButton.className = referenceButton.className;
     runButton.setAttribute(RUN_BUTTON_ATTR, '1');
     runButton.setAttribute('title', 'Trigger the doujinshi-dl-gui run command.');
-    runButton.style.marginLeft = '8px';
     runButton.innerHTML = '<i class="fa fa-play"></i> Run';
     return runButton;
   };
