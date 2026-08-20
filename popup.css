@@ -1,0 +1,112 @@
+:root {
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #f1f1f1;
+}
+
+body {
+  margin: 0;
+  padding: 12px;
+  width: 320px;
+  background: #15141b;
+  color: #f1f1f1;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+  color: #f9f9fb;
+}
+
+h2 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #d5d5de;
+}
+
+.section {
+  background: #1f1f2b;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #2c2c3a;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toggle {
+  display: flex;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.sub-toggle {
+  margin-left: 20px;
+  opacity: 0.9;
+}
+
+.sub-toggle input {
+  margin-top: 2px;
+}
+
+.toggle input {
+  margin-top: 4px;
+}
+
+.toggle .title {
+  font-weight: 600;
+  color: #f5f5fb;
+}
+
+.toggle .subtitle {
+  display: block;
+  font-size: 11px;
+  color: #b8b8c6;
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: #b0b0bc;
+}
+
+button {
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #262536;
+  color: #f1f1f1;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.status-chip {
+  align-self: flex-start;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #333147;
+  color: #d5d5de;
+  border: 1px solid #403f55;
+}
+
+.status-chip.ok {
+  background: #183c2c;
+  border-color: #2a8b57;
+  color: #7be0a5;
+}
+
+.status-chip.error {
+  background: #4a1f28;
+  border-color: #db3e63;
+  color: #ff6e91;
+}

@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "doujinshi-dl Helper",
+  "description": "Send gallery IDs to doujinshi-dl-gui.",
+  "version": "0.8.0",
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "storage",
+    "scripting",
+    "notifications"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://nhentai.net/*",
+    "https://*.nhentai.net/*",
+    "http://127.0.0.1:31363/*"
+  ],
+  "action": {
+    "default_title": "doujinshi-dl Helper",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["https://nhentai.net/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

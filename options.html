@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>doujinshi-dl Helper Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>doujinshi-dl Helper · Gallery Clicks</h1>
+        <p class="intro">Fine-tune how the extension handles the <code>#gallery_id</code> button when the bridge is active.</p>
+      </header>
+      <section class="section">
+        <label class="toggle">
+          <input type="checkbox" id="opt-gallery-copy" />
+          <div>
+            <span class="title">Keep site copy toast</span>
+            <span class="subtitle">Allow the site to copy the gallery ID and show its original notification.</span>
+          </div>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="opt-gallery-clipboard" />
+          <div>
+            <span class="title">Copy gallery ID via extension</span>
+            <span class="subtitle">After sending the ID to the desktop app, also copy <code>#ID</code> to your clipboard.</span>
+          </div>
+        </label>
+        <label class="toggle sub-toggle">
+          <input type="checkbox" id="opt-gallery-clipboard-silent" />
+          <div>
+            <span class="title">Hide copy toast</span>
+            <span class="subtitle">Skip the helper notification after copying.</span>
+          </div>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="opt-run-command-button" />
+          <div>
+            <span class="title">Add Run button</span>
+            <span class="subtitle">Insert a Run button next to Download that triggers the GUI's Run button.</span>
+          </div>
+        </label>
+      </section>
+      <p class="hint">Changes apply instantly. Disable the gallery bridge entirely if you want the site to behave as usual.</p>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

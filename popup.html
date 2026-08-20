@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>doujinshi-dl Helper</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <h1>doujinshi-dl Helper</h1>
+      <section class="section">
+        <h2>Features</h2>
+        <div class="status-chip" id="bridge-status">Checking bridge…</div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-gallery" />
+          <div>
+            <span class="title">Gallery ID bridge</span>
+            <span class="subtitle">Left-click appends IDs, Ctrl+Left click clears first.</span>
+          </div>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-gallery-copy" />
+          <div>
+            <span class="title">Keep site copy toast</span>
+            <span class="subtitle">Allow the site to copy the gallery ID and show its own notification.</span>
+          </div>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-gallery-clipboard" />
+          <div>
+            <span class="title">Copy gallery ID via extension</span>
+            <span class="subtitle">When the bridge is active, copy the ID to your clipboard without the site's alert.</span>
+          </div>
+        </label>
+        <label class="toggle sub-toggle">
+          <input type="checkbox" id="toggle-gallery-clipboard-silent" />
+          <div>
+            <span class="title">Hide copy toast</span>
+            <span class="subtitle">Skip the extension popup after copying.</span>
+          </div>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-run-command-button" />
+          <div>
+            <span class="title">Add Run button</span>
+            <span class="subtitle">Insert a Run button next to Download that triggers the GUI's Run button.</span>
+          </div>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-notifications" />
+          <div>
+            <span class="title">Desktop notifications</span>
+            <span class="subtitle">Show system notifications for gallery IDs.</span>
+          </div>
+        </label>
+      </section>
+    </main>
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>
