@@ -3,6 +3,7 @@ const galleryCopyToggle = document.getElementById('toggle-gallery-copy');
 const galleryClipboardToggle = document.getElementById('toggle-gallery-clipboard');
 const galleryClipboardSilentToggle = document.getElementById('toggle-gallery-clipboard-silent');
 const runCommandButtonToggle = document.getElementById('toggle-run-command-button');
+const authorCopyToggle = document.getElementById('toggle-author-copy');
 const notificationsToggle = document.getElementById('toggle-notifications');
 const bridgeStatusEl = document.getElementById('bridge-status');
 
@@ -13,6 +14,7 @@ const DEFAULT_SETTINGS = {
   copyGalleryIdViaExtension: false,
   suppressGalleryCopyToast: false,
   downloadButtonRunsCommand: false,
+  enableAuthorCopy: true,
 };
 
 function syncGalleryClipboardSubToggle(isParentEnabled) {
@@ -26,6 +28,7 @@ async function loadSettings() {
   galleryClipboardToggle.checked = settings.copyGalleryIdViaExtension;
   galleryClipboardSilentToggle.checked = settings.suppressGalleryCopyToast;
   runCommandButtonToggle.checked = settings.downloadButtonRunsCommand;
+  authorCopyToggle.checked = settings.enableAuthorCopy;
   notificationsToggle.checked = settings.enableNotifications;
   syncGalleryClipboardSubToggle(settings.copyGalleryIdViaExtension);
 }
@@ -52,6 +55,10 @@ galleryClipboardSilentToggle.addEventListener('change', async () => {
 
 runCommandButtonToggle.addEventListener('change', async () => {
   await chrome.storage.local.set({ downloadButtonRunsCommand: runCommandButtonToggle.checked });
+});
+
+authorCopyToggle.addEventListener('change', async () => {
+  await chrome.storage.local.set({ enableAuthorCopy: authorCopyToggle.checked });
 });
 
 notificationsToggle.addEventListener('change', async () => {

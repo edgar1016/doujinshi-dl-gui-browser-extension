@@ -56,6 +56,121 @@
     }
   });
 
+  const AUTHOR_TITLE_SELECTOR = 'h1.title .before';
+  const AUTHOR_HIGHLIGHT_NAME = 'doujinshi-dl-helper-author';
+
+  let authorCopyEnabled = true;
+  let hoveredAuthorTitle = null;
+
+  // Matches "[Circle (Author)]" and "[Author]", skipping prefixes such as "(C99) ".
+  const findAuthorSpan = (text) => {
+    const group = text.match(/\[([^\]]+)\]/);
+    if (!group) {
+      return null;
+    }
+    const nested = group[1].match(/\(([^()]+)\)\s*$/);
+    const raw = nested ? nested[1] : group[1];
+    const name = raw.trim();
+    if (!name) {
+      return null;
+    }
+    const rawStart = group.index + 1 + (nested ? nested.index + 1 : 0);
+    const start = rawStart + raw.indexOf(name);
+    return { name, start, end: start + name.length };
+  };
+
+  const formatAuthorName = (name) => `[${name.charAt(0).toUpperCase()}${name.slice(1)}]`;
+
+  // The title is owned by Svelte, so the name is located with a Range instead of wrapping it in a new element.
+  const getAuthorAtPoint = (target, x, y) => {
+    const titleEl = target?.closest?.(AUTHOR_TITLE_SELECTOR);
+    if (!titleEl) {
+      return null;
+    }
+    const textNode = Array.from(titleEl.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+    const span = textNode ? findAuthorSpan(textNode.nodeValue) : null;
+    if (!span) {
+      return null;
+    }
+    const range = document.createRange();
+    range.setStart(textNode, span.start);
+    range.setEnd(textNode, span.end);
+    const isInside = Array.from(range.getClientRects()).some(
+      (rect) => x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+    );
+    return isInside ? { titleEl, range, name: span.name } : null;
+  };
+
+  const clearAuthorHover = () => {
+    if (!hoveredAuthorTitle) {
+      return;
+    }
+    hoveredAuthorTitle.style.cursor = '';
+    hoveredAuthorTitle.removeAttribute('title');
+    hoveredAuthorTitle = null;
+    window.CSS?.highlights?.delete(AUTHOR_HIGHLIGHT_NAME);
+  };
+
+  const ensureAuthorHighlightStyle = () => {
+    if (document.getElementById(AUTHOR_HIGHLIGHT_NAME)) {
+      return;
+    }
+    const style = document.createElement('style');
+    style.id = AUTHOR_HIGHLIGHT_NAME;
+    style.textContent = `::highlight(${AUTHOR_HIGHLIGHT_NAME}) { color: #ed2553; text-decoration: underline; }`;
+    document.head.appendChild(style);
+  };
+
+  const applyAuthorHover = ({ titleEl, range, name }) => {
+    if (hoveredAuthorTitle === titleEl) {
+      return;
+    }
+    clearAuthorHover();
+    hoveredAuthorTitle = titleEl;
+    titleEl.style.cursor = 'pointer';
+    titleEl.title = `Click to copy ${formatAuthorName(name)}`;
+    if (window.CSS?.highlights) {
+      ensureAuthorHighlightStyle();
+      CSS.highlights.set(AUTHOR_HIGHLIGHT_NAME, new Highlight(range));
+    }
+  };
+
+  document.addEventListener('mousemove', (event) => {
+    const author = authorCopyEnabled ? getAuthorAtPoint(event.target, event.clientX, event.clientY) : null;
+    if (author) {
+      applyAuthorHover(author);
+    } else {
+      clearAuthorHover();
+    }
+  }, { passive: true });
+
+  document.addEventListener('click', async (event) => {
+    if (event.button !== 0 || !authorCopyEnabled || !window.getSelection().isCollapsed) {
+      return;
+    }
+    const author = getAuthorAtPoint(event.target, event.clientX, event.clientY);
+    if (!author) {
+      return;
+    }
+    const formattedName = formatAuthorName(author.name);
+    try {
+      await navigator.clipboard.writeText(formattedName);
+      showToast('Author copied', `${formattedName} is now in your clipboard.`);
+    } catch (error) {
+      console.warn('doujinshi-dl Helper: Failed to copy author name.', error);
+    }
+  }, { capture: true });
+
+  chrome.storage.local.get({ enableAuthorCopy: true }, (items) => {
+    authorCopyEnabled = items.enableAuthorCopy;
+  });
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.enableAuthorCopy) {
+      authorCopyEnabled = changes.enableAuthorCopy.newValue;
+    }
+  });
+
   const galleryHeading = document.querySelector('#gallery_id');
   if (!galleryHeading) {
     return;
