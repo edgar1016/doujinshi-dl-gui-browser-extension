@@ -13,6 +13,7 @@
       container.style.flexDirection = 'column';
       container.style.alignItems = 'center';
       container.style.gap = '8px';
+      container.style.pointerEvents = 'none';
       document.body.appendChild(container);
     }
 
@@ -56,11 +57,12 @@
     }
   });
 
-  const AUTHOR_TITLE_SELECTOR = 'h1.title .before';
-  const AUTHOR_HIGHLIGHT_NAME = 'doujinshi-dl-helper-author';
+  const AUTHOR_SELECTOR = 'h1.title .before';
+  const TITLE_SELECTOR = 'h1.title .pretty, h2.title .pretty';
+  const COPY_HIGHLIGHT_NAME = 'doujinshi-dl-helper-copy';
 
-  let authorCopyEnabled = true;
-  let hoveredAuthorTitle = null;
+  let titleCopyEnabled = true;
+  let hoveredCopyTarget = null;
 
   // Matches "[Circle (Author)]" and "[Author]", skipping prefixes such as "(C99) ".
   const findAuthorSpan = (text) => {
@@ -79,95 +81,118 @@
     return { name, start, end: start + name.length };
   };
 
+  // A title may hold several translations separated by "|"; each one is its own span.
+  const findTitleSpans = (text) => Array.from(text.matchAll(/[^|｜]+/g), (match) => {
+    const name = match[0].trim();
+    const start = match.index + match[0].indexOf(name);
+    return { name, start, end: start + name.length };
+  }).filter((span) => span.name);
+
   const formatAuthorName = (name) => `[${name.charAt(0).toUpperCase()}${name.slice(1)}]`;
 
-  // The title is owned by Svelte, so the name is located with a Range instead of wrapping it in a new element.
-  const getAuthorAtPoint = (target, x, y) => {
-    const titleEl = target?.closest?.(AUTHOR_TITLE_SELECTOR);
-    if (!titleEl) {
-      return null;
-    }
-    const textNode = Array.from(titleEl.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+  const getTextNode = (element) => Array.from(element.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+
+  const getPageAuthor = () => {
+    const authorEl = document.querySelector(AUTHOR_SELECTOR);
+    const textNode = authorEl ? getTextNode(authorEl) : null;
     const span = textNode ? findAuthorSpan(textNode.nodeValue) : null;
-    if (!span) {
-      return null;
-    }
-    const range = document.createRange();
-    range.setStart(textNode, span.start);
-    range.setEnd(textNode, span.end);
-    const isInside = Array.from(range.getClientRects()).some(
-      (rect) => x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
-    );
-    return isInside ? { titleEl, range, name: span.name } : null;
+    return span ? formatAuthorName(span.name) : null;
   };
 
-  const clearAuthorHover = () => {
-    if (!hoveredAuthorTitle) {
+  // The title is owned by Svelte, so text is located with a Range instead of wrapping it in a new element.
+  const getCopyTargetAtPoint = (target, x, y) => {
+    const element = target?.closest?.(`${AUTHOR_SELECTOR}, ${TITLE_SELECTOR}`);
+    const textNode = element ? getTextNode(element) : null;
+    if (!textNode) {
+      return null;
+    }
+    const isAuthor = element.matches(AUTHOR_SELECTOR);
+    const spans = isAuthor
+      ? [findAuthorSpan(textNode.nodeValue)].filter(Boolean)
+      : findTitleSpans(textNode.nodeValue);
+    for (const span of spans) {
+      const range = document.createRange();
+      range.setStart(textNode, span.start);
+      range.setEnd(textNode, span.end);
+      const isInside = Array.from(range.getClientRects()).some(
+        (rect) => x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+      );
+      if (isInside) {
+        const text = isAuthor
+          ? formatAuthorName(span.name)
+          : [getPageAuthor(), span.name].filter(Boolean).join(' ');
+        return { element, range, text, label: isAuthor ? 'Author copied' : 'Title copied' };
+      }
+    }
+    return null;
+  };
+
+  const clearCopyHover = () => {
+    if (!hoveredCopyTarget) {
       return;
     }
-    hoveredAuthorTitle.style.cursor = '';
-    hoveredAuthorTitle.removeAttribute('title');
-    hoveredAuthorTitle = null;
-    window.CSS?.highlights?.delete(AUTHOR_HIGHLIGHT_NAME);
+    hoveredCopyTarget.element.style.cursor = '';
+    hoveredCopyTarget.element.removeAttribute('title');
+    hoveredCopyTarget = null;
+    window.CSS?.highlights?.delete(COPY_HIGHLIGHT_NAME);
   };
 
-  const ensureAuthorHighlightStyle = () => {
-    if (document.getElementById(AUTHOR_HIGHLIGHT_NAME)) {
+  const ensureCopyHighlightStyle = () => {
+    if (document.getElementById(COPY_HIGHLIGHT_NAME)) {
       return;
     }
     const style = document.createElement('style');
-    style.id = AUTHOR_HIGHLIGHT_NAME;
-    style.textContent = `::highlight(${AUTHOR_HIGHLIGHT_NAME}) { color: #ed2553; text-decoration: underline; }`;
+    style.id = COPY_HIGHLIGHT_NAME;
+    style.textContent = `::highlight(${COPY_HIGHLIGHT_NAME}) { color: #ed2553; text-decoration: underline; }`;
     document.head.appendChild(style);
   };
 
-  const applyAuthorHover = ({ titleEl, range, name }) => {
-    if (hoveredAuthorTitle === titleEl) {
+  const applyCopyHover = (copyTarget) => {
+    if (hoveredCopyTarget?.element === copyTarget.element && hoveredCopyTarget.text === copyTarget.text) {
       return;
     }
-    clearAuthorHover();
-    hoveredAuthorTitle = titleEl;
-    titleEl.style.cursor = 'pointer';
-    titleEl.title = `Click to copy ${formatAuthorName(name)}`;
+    clearCopyHover();
+    hoveredCopyTarget = copyTarget;
+    copyTarget.element.style.cursor = 'pointer';
+    copyTarget.element.title = `Click to copy ${copyTarget.text}`;
     if (window.CSS?.highlights) {
-      ensureAuthorHighlightStyle();
-      CSS.highlights.set(AUTHOR_HIGHLIGHT_NAME, new Highlight(range));
+      ensureCopyHighlightStyle();
+      CSS.highlights.set(COPY_HIGHLIGHT_NAME, new Highlight(copyTarget.range));
     }
   };
 
   document.addEventListener('mousemove', (event) => {
-    const author = authorCopyEnabled ? getAuthorAtPoint(event.target, event.clientX, event.clientY) : null;
-    if (author) {
-      applyAuthorHover(author);
+    const copyTarget = titleCopyEnabled ? getCopyTargetAtPoint(event.target, event.clientX, event.clientY) : null;
+    if (copyTarget) {
+      applyCopyHover(copyTarget);
     } else {
-      clearAuthorHover();
+      clearCopyHover();
     }
   }, { passive: true });
 
   document.addEventListener('click', async (event) => {
-    if (event.button !== 0 || !authorCopyEnabled || !window.getSelection().isCollapsed) {
+    if (event.button !== 0 || !titleCopyEnabled || !window.getSelection().isCollapsed) {
       return;
     }
-    const author = getAuthorAtPoint(event.target, event.clientX, event.clientY);
-    if (!author) {
+    const copyTarget = getCopyTargetAtPoint(event.target, event.clientX, event.clientY);
+    if (!copyTarget) {
       return;
     }
-    const formattedName = formatAuthorName(author.name);
     try {
-      await navigator.clipboard.writeText(formattedName);
-      showToast('Author copied', `${formattedName} is now in your clipboard.`);
+      await navigator.clipboard.writeText(copyTarget.text);
+      showToast(copyTarget.label, `${copyTarget.text} is now in your clipboard.`);
     } catch (error) {
-      console.warn('doujinshi-dl Helper: Failed to copy author name.', error);
+      console.warn('doujinshi-dl Helper: Failed to copy title.', error);
     }
   }, { capture: true });
 
-  chrome.storage.local.get({ enableAuthorCopy: true }, (items) => {
-    authorCopyEnabled = items.enableAuthorCopy;
+  chrome.storage.local.get({ enableTitleCopy: true }, (items) => {
+    titleCopyEnabled = items.enableTitleCopy;
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.enableAuthorCopy) {
-      authorCopyEnabled = changes.enableAuthorCopy.newValue;
+    if (area === 'local' && changes.enableTitleCopy) {
+      titleCopyEnabled = changes.enableTitleCopy.newValue;
     }
   });
 

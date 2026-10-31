@@ -6,7 +6,7 @@ Companion browser extension for **[doujinshi-dl-gui](https://codeberg.org/Edgar1
 
 - 🔗 **Gallery ID bridge** — left-click a gallery's ID to send it straight to doujinshi-dl-gui.
 - ▶️ **Run button** — adds a dedicated button next to Download that triggers the GUI's Run command.
-- 📋 **Author copy** — click the author's name in a gallery title to copy it as `[Author]`.
+- 📋 **Author & title copy** — click a gallery's author or title to copy `[Author]` or `[Author] Title`.
 - 🔔 **Notifications** — choose between desktop notifications or lightweight in-page toasts.
 - ⚙️ **Fully configurable** — toggle every feature from the popup or the options page.
 
@@ -37,9 +37,14 @@ If the GUI is not running (or the HTTP bridge is disabled), the extension logs a
 
 Enable **Add Run button** in the popup (or options page) to insert a separate "Run" button next to the site's Download button. Clicking it triggers the GUI's Run command without affecting the original Download button.
 
-### Author Copy
+### Author & Title Copy
 
-Hover the author's name in a gallery title and click it to copy the name wrapped in brackets, with the first letter capitalized. For `[Mahomaho Koubou (Mahomaho)]` the name in parentheses is used, so the clipboard gets `[Mahomaho]`; for `[mahomaho]` it gets `[Mahomaho]`. Turn it off with **Copy author on click** in the popup or options page.
+Hover the author's name or a title on a gallery page and click it to copy, ready to use as a folder name:
+
+- **Author** — copies the name in brackets with the first letter capitalized. For `[Mahomaho Koubou (Mahomaho)]` the name in parentheses is used, so the clipboard gets `[Mahomaho]`.
+- **Title** — copies `[Author] Title`. When a title holds two versions separated by `|`, each side is its own click target, so you copy only the one you click.
+
+Turn it off with **Copy author and title on click** in the popup or options page.
 
 ### Popup & Options
 
