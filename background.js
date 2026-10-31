@@ -31,7 +31,7 @@ async function showNotification(title, message, tabId) {
   if (enableNotifications) {
     chrome.notifications.create('', {
       type: 'basic',
-      iconUrl: chrome.runtime.getURL('icon.png'),
+      iconUrl: chrome.runtime.getURL('icons/icon128.png'),
       title,
       message,
     });
