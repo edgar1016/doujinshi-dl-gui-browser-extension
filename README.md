@@ -42,7 +42,7 @@ Enable **Add Run button** in the popup (or options page) to insert a separate "R
 Hover the author's name or a title on a gallery page and click it to copy, ready to use as a folder name:
 
 - **Author** — copies the name in brackets with the first letter capitalized. For `[Mahomaho Koubou (Mahomaho)]` the name in parentheses is used, so the clipboard gets `[Mahomaho]`.
-- **Title** — copies `[Author] Title`. When a title holds two versions separated by `|`, each side is its own click target, so you copy only the one you click.
+- **Title** — copies `[Author] Title`. When a title holds two versions separated by `|` or by a single ` - ` with at least three words on each side, each side is its own click target, so you copy only the one you click.
 
 Turn it off with **Copy author and title on click** in the popup or options page.
 

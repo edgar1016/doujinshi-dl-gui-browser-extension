@@ -81,12 +81,31 @@
     return { name, start, end: start + name.length };
   };
 
-  // A title may hold several translations separated by "|"; each one is its own span.
-  const findTitleSpans = (text) => Array.from(text.matchAll(/[^|｜]+/g), (match) => {
-    const name = match[0].trim();
-    const start = match.index + match[0].indexOf(name);
-    return { name, start, end: start + name.length };
-  }).filter((span) => span.name);
+  // Translations are split by "|", or by one spaced dash when both sides are long enough not to be a subtitle.
+  const getTitleSeparator = (text) => {
+    if (/[|｜]/.test(text)) {
+      return /([|｜])/;
+    }
+    const dashSeparator = /(\s[-–—]\s)/;
+    const parts = text.split(dashSeparator).filter((_, index) => index % 2 === 0);
+    const isDualTitle = parts.length === 2 && parts.every((part) => part.trim().split(/\s+/).length >= 3);
+    return isDualTitle ? dashSeparator : undefined;
+  };
+
+  const findTitleSpans = (text) => {
+    const spans = [];
+    let offset = 0;
+    // The capture group keeps separators at odd indexes so offsets stay accurate.
+    text.split(getTitleSeparator(text)).forEach((piece, index) => {
+      const name = piece.trim();
+      if (index % 2 === 0 && name) {
+        const start = offset + piece.indexOf(name);
+        spans.push({ name, start, end: start + name.length });
+      }
+      offset += piece.length;
+    });
+    return spans;
+  };
 
   const formatAuthorName = (name) => `[${name.charAt(0).toUpperCase()}${name.slice(1)}]`;
 
